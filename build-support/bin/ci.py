@@ -158,9 +158,6 @@ def set_run_from_pex() -> None:
     os.environ["RUN_PANTS_FROM_PEX"] = "1"
 
 
-IS_PR_BUILD = "CI" in os.environ and os.environ.get("TRAVIS_PULL_REQUEST", "false") != "false"
-
-
 # -------------------------------------------------------------------------
 # Bootstrap pants.pex
 # -------------------------------------------------------------------------
@@ -270,7 +267,7 @@ def run_smoke_tests() -> None:
 def run_lint(*, remote_cache_enabled: bool) -> None:
     targets = ["build-support::", "src::", "tests::"]
     command = ["./pants.pex", "--tag=-nolint", "lint", "typecheck", *targets]
-    if remote_cache_enabled and IS_PR_BUILD is False:
+    if remote_cache_enabled:
         command.append("--pants-config-files=pants.remote-cache.toml")
     _run_command(
         command,
@@ -326,7 +323,7 @@ def run_python_tests(
     *, include_unit: bool, include_integration: bool, remote_cache_enabled: bool
 ) -> None:
     extra_args = []
-    if remote_cache_enabled and IS_PR_BUILD is False:
+    if remote_cache_enabled:
         extra_args.append("--pants-config-files=pants.remote-cache.toml")
     if not include_unit and not include_integration:
         raise ValueError(
